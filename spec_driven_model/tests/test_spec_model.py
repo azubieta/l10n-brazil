@@ -4,12 +4,12 @@
 from odoo_test_helper import FakeModelLoader
 
 from odoo.models import NewId
-from odoo.tests import SavepointCase
+from odoo.tests import TransactionCase
 
 from ..hooks import get_remaining_spec_models
 
 
-class TestSpecModel(SavepointCase, FakeModelLoader):
+class TestSpecModel(TransactionCase, FakeModelLoader):
     """
     A simple usage example using the reference PurchaseOrderSchema.xsd
     https://docs.microsoft.com/en-us/visualstudio/xml-tools/sample-xsd-file-purchase-order-schema?view=vs-2019
