@@ -137,27 +137,25 @@ def register_hook(env, module_name, spec_module):
         spec_class = StackedModel._odoo_name_to_class(name, spec_module)
         spec_class._module = "fiscal"  # TODO use python_module ?
         fields = env[spec_class._name].fields_get_keys()
-        rec_name = next(
-            filter(
-                lambda x: (
-                    x.startswith(env[spec_class._name]._field_prefix)
-                    and "_choice" not in x
-                ),
+
+        model_data = {
+            "_name": spec_class._name,
+            "__module__": module_name,
+            "_inherit": [spec_class._inherit, "spec.mixin"],
+            "_original_module": "fiscal",
+            "_spec_module": spec_module,
+        }
+        if fields:
+            field_prefix = env[spec_class._name]._field_prefix
+            rec_names = list(filter(
+                lambda x: (x.startswith(field_prefix) and "_choice" not in x),
                 fields,
-            )
-        )
-        c = type(
-            name,
-            (SpecModel, spec_class),
-            {
-                "_name": spec_class._name,
-                "_inherit": [spec_class._inherit, "spec.mixin"],
-                "_original_module": "fiscal",
-                "_odoo_module": module_name,
-                "_spec_module": spec_module,
-                "_rec_name": rec_name,
-            },
-        )
+            ))
+            # pick first name as rec_name
+            if rec_names:
+                model_data["_rec_name"] = rec_names[0]
+
+        c = type(name, (SpecModel, spec_class), model_data)
         models.MetaModel.module_to_models[module_name] += [c]
 
         # now we init these models properly
